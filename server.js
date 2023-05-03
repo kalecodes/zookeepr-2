@@ -39,6 +39,11 @@ function filterByQuery(query, animalsArray) {
     return filteredResults;
 }
 
+function findById(id, animalsArray) {
+    const result = animalsArray.filter(animal => animal.id === id )[0];
+    return result;
+}
+
 // 3: create a route that the frontend can request data from 
 app.get('/api/animals', (req, res) => {
     let results = animals;
@@ -46,6 +51,19 @@ app.get('/api/animals', (req, res) => {
         results = filterByQuery(req.query, results);
     }
     res.json(results);
+});
+
+// req.query is multifaceted, often combining multiple parameters
+// req.param is specific to a single property, often intended to retrieve a single record
+// param route must come after the other get route
+app.get('/api/animals/:id', (req, res) => {
+    const result = findById(req.params.id, animals);
+    if (result) {
+        res.json(result);
+    } else {
+        // send 404 if animal not found for that id
+        res.send(404);
+    }
 });
 
 // 2: chain listen() onto our server to make our server listen for requests
