@@ -9,11 +9,13 @@ const PORT = process.env.PORT || 3001;
 // 1: instantiate the server
 const app = express();
 
-// MIDDLEWARE: intercept POST request and convert raw data to JSON object
+// 4. MIDDLEWARE: intercept incoming data and convert raw data to JSON object
 // parse incoming string or array data
 app.use(express.urlencoded({ extended: true }));
 // parese incoming JSON data
 app.use(express.json());
+// instruct server to make public folder readily available so it can be access by html pages
+app.use(express.static('public'));
 
 // filter results based on query strings
 function filterByQuery(query, animalsArray) {
@@ -83,6 +85,22 @@ function createNewAnimal(body, animalsArray) {
     return animal;
 }
 
+// html routes
+app.get('/', (req, res) => {
+    // respond with html page to display in browser
+    res.sendFile(path.join(__dirname, './public/index.html'));
+});
+
+app.get('/animals', (req, res) => {
+    res.sendFile(path.join(__dirname, './public/animals.html'));
+});
+
+app.get('/zookeepers', (req, res) => {
+    res.sendFile(path.join(__dirname, './public/zookeepers.html'));
+});
+
+
+// API routes
 // 3: create a route that the frontend can request data from 
 app.get('/api/animals', (req, res) => {
     let results = animals;
@@ -105,7 +123,7 @@ app.get('/api/animals/:id', (req, res) => {
     }
 });
 
-// POST route represents action of client requesting the server to accept data
+// POST route represents action of client requesting the server to accept data (req.body is how we access that data)
 app.post('/api/animals', (req, res) => {
     // set id based on what the next index of the array will be
     req.body.id = animals.length.toString();
@@ -119,6 +137,11 @@ app.post('/api/animals', (req, res) => {
 
         res.json(animal);
     }
+});
+
+// wildcard route to redirect user if an invalid route is entered (this should come after all other html routes)
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, './public/index.html'));
 });
 
 // 2: chain listen() onto our server to make our server listen for requests
